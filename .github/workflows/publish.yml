@@ -1,0 +1,59 @@
+# Build, test and publish the Nexius Release Dashboard extension to the Azure DevOps
+# Marketplace. Publishing runs under the BOT identity via the AZURE_DEVOPS_MARKETPLACE_PAT
+# repo secret (a Marketplace "Manage"-scoped PAT of the service/bot account) — never a
+# personal token. It only publishes when configs/nexius.json's version was bumped in the
+# merge (or on a manual dispatch), so ordinary merges don't fail on a duplicate version.
+name: Publish extension
+
+on:
+  push:
+    branches: [main]
+    paths: ['extension/**']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: github.repository == 'nexius-learning/nexius-release-dashboard'
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run compile
+
+      - name: Detect version bump
+        id: ver
+        working-directory: .
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          elif git diff "${{ github.event.before }}" "${{ github.sha }}" -- extension/configs/nexius.json | grep -q '^[+-] *"version"'; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "No version bump in configs/nexius.json — skipping publish."
+          fi
+
+      - name: Publish to ADO Marketplace
+        if: steps.ver.outputs.publish == 'true'
+        run: >-
+          npx tfx-cli extension publish
+          --manifest-globs vss-extension.json
+          --overrides-file configs/nexius.json
+          --auth-type pat
+          --token "$MARKETPLACE_PAT"
+          --no-wait-validation
+        env:
+          MARKETPLACE_PAT: ${{ secrets.AZURE_DEVOPS_MARKETPLACE_PAT }}
