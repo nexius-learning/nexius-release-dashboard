@@ -2,21 +2,28 @@ import { useState, useEffect } from 'react'
 import { IPipelineInstance } from '../types'
 import { getBuild, getBuildTimeline } from '../api/BuildClient'
 import { getPipelineApprovals } from '../api/PipelineApprovalsClient'
+import { getConsumedAppVersion } from '../api/PipelineRunClient'
 
 interface BuildAndApprovalData {
     buildNames: Record<string, string>
     approvalNames: Record<string, string>
+    versions: Record<string, string>
+    branches: Record<string, string>
 }
 
 export const useBuildAndApprovalData = (pipelines: IPipelineInstance[], projectName?: string): BuildAndApprovalData => {
     const [buildNames, setBuildNames] = useState<Record<string, string>>({})
     const [approvalNames, setApprovalNames] = useState<Record<string, string>>({})
+    const [versions, setVersions] = useState<Record<string, string>>({})
+    const [branches, setBranches] = useState<Record<string, string>>({})
 
     useEffect(() => {
         if (!projectName) return
 
         const newBuildNames: Record<string, string> = {}
         const newApprovalNames: Record<string, string> = {}
+        const newVersions: Record<string, string> = {}
+        const newBranches: Record<string, string> = {}
 
         async function fetchBuildAndApprovalData() {
             const pending: Array<Promise<void>> = []
@@ -34,6 +41,18 @@ export const useBuildAndApprovalData = (pipelines: IPipelineInstance[], projectN
                             if (!build) return
 
                             const buildId = build.id
+
+                            // Deployed app version (from the deploy run's consumed pipeline resources) + branch.
+                            if (build.sourceBranch) {
+                                newBranches[key] = build.sourceBranch.replace(/^refs\/heads\//, '')
+                            }
+                            const version = await getConsumedAppVersion(
+                                projectName!,
+                                build.definition.id,
+                                build.id,
+                                deploymentInstance.stageName
+                            )
+                            if (version) newVersions[key] = version
                             const timeline = await getBuildTimeline(projectName!, deploymentInstance.buildId!)
 
                             if (!timeline) {
@@ -95,10 +114,12 @@ export const useBuildAndApprovalData = (pipelines: IPipelineInstance[], projectN
             await Promise.all(pending)
             setBuildNames(newBuildNames)
             setApprovalNames(newApprovalNames)
+            setVersions(newVersions)
+            setBranches(newBranches)
         }
 
         fetchBuildAndApprovalData()
     }, [pipelines, projectName])
 
-    return { buildNames, approvalNames }
+    return { buildNames, approvalNames, versions, branches }
 }

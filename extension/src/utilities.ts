@@ -1,6 +1,23 @@
 import { Statuses } from 'azure-devops-ui/Status'
 import { IEnvironmentInstance, ISortableByConvention, IStatusIndicatorData } from './types'
 
+/**
+ * Whether a deployment record should be surfaced when the "only succeeded/failed" setting is on.
+ * Keeps the "green" states (Succeeded / SucceededWithIssues) and the "red" state (Failed); drops
+ * Skipped / Canceled / Abandoned / in-progress so a cell reflects the last real deploy, not a skip.
+ *
+ * Uses the numeric TaskResult codes directly (as getStatusIndicatorData does):
+ * 0 Succeeded, 1 SucceededWithIssues, 2 Failed, 3 Canceled, 4 Skipped, 5 Abandoned.
+ * The SDK returns the numeric enum; a string form is handled defensively.
+ */
+export function isShownDeploymentResult(result: number | string | undefined): boolean {
+    if (typeof result === 'string') {
+        const r = result.toLowerCase()
+        return r === 'succeeded' || r === 'succeededwithissues' || r === 'failed'
+    }
+    return result === 0 || result === 1 || result === 2
+}
+
 function applySortOrder(item: ISortableByConvention, groupWord: string, groupSortOrder: number) {
     if (item.conventionSortOrder) return
 

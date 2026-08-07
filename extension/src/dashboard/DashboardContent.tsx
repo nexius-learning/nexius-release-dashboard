@@ -23,7 +23,7 @@ enum ViewType {
 
 export const DashboardContent = (props: DashboardContentProps) => {
     const {
-        state: { environments, pipelines, projectInfo, isLoading },
+        state: { environments, pipelines, projectInfo, isLoading, groupByStage },
     } = props
 
     const viewSelection = new DropdownSelection()
@@ -51,7 +51,7 @@ export const DashboardContent = (props: DashboardContentProps) => {
         {
             iconProps: { iconName: 'Settings' },
             id: 'deployment-dashboard-settings',
-            tooltipProps: { text: 'Navigate to PivotPro Release Dashboard settings' },
+            tooltipProps: { text: 'Navigate to Nexius Release Dashboard settings' },
             isPrimary: true,
             important: true,
             href: projectInfo?.settingsUri,
@@ -70,7 +70,7 @@ export const DashboardContent = (props: DashboardContentProps) => {
                 <HeaderTitleArea>
                     <HeaderTitleRow>
                         <HeaderTitle ariaLevel={3} className="text-ellipsis" titleSize={TitleSize.Large}>
-                            PivotPro Release Dashboard
+                            Nexius Release Dashboard
                         </HeaderTitle>
                     </HeaderTitleRow>
                     <HeaderDescription className="flex-row flex-center justify-space-between">
@@ -102,9 +102,19 @@ export const DashboardContent = (props: DashboardContentProps) => {
                             </div>
                         </div>
                     ) : viewType === ViewType.List ? (
-                        <ListViewDeploymentsTable environments={environments} pipelines={pipelines} projectName={projectInfo?.name} />
+                        <ListViewDeploymentsTable
+                            environments={environments}
+                            pipelines={pipelines}
+                            projectName={projectInfo?.name}
+                            groupByStage={groupByStage}
+                        />
                     ) : (
-                        <TreeViewDeploymentsTable environments={environments} pipelines={pipelines} projectName={projectInfo?.name} />
+                        <TreeViewDeploymentsTable
+                            environments={environments}
+                            pipelines={pipelines}
+                            projectName={projectInfo?.name}
+                            groupByStage={groupByStage}
+                        />
                     )}
                 </Card>
             </div>

@@ -1,0 +1,9 @@
+{
+    "id": "nexius-release-dashboard",
+    "publisher": "BitwitZrt",
+    "name": "Nexius Release Dashboard",
+    "version": "1.1.3",
+    "description": "Cross-service deployment overview for YAML pipelines + Environments — shows the deployed app version and source branch per environment. Fork of SixPivot PivotPro Release Dashboard (MIT).",
+    "public": false,
+    "scopes": ["vso.build", "vso.environment_manage"]
+}

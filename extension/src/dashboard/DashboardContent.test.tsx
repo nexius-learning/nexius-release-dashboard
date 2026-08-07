@@ -13,7 +13,7 @@ test('Render and check layout', async () => {
 
     // Wait for the heading first
     const heading = await screen.findByRole('heading')
-    expect(heading).toHaveTextContent('PivotPro Release Dashboard')
+    expect(heading).toHaveTextContent('Nexius Release Dashboard')
 
     // Then wait for the grid
     const grid = await screen.findByRole('grid')

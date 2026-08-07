@@ -10,16 +10,27 @@ import { getEnvironmentsSortedByConvention } from '../api/AzureDevopsClient'
 import { initAzureDevOpsSdk } from '../api/AzureDevOpsSdkManager'
 import { SettingsContent } from './SettingsContent'
 
-async function load(): Promise<{ environments: ArrayItemProvider<IEnvironmentInstance>; projectInfo: IDevOpsProjectInfo }> {
+async function load(): Promise<{
+    environments: ArrayItemProvider<IEnvironmentInstance>
+    projectInfo: IDevOpsProjectInfo
+    groupByStage: boolean
+    onlySuccessFailed: boolean
+}> {
     var _projectInfo = await initAzureDevOpsSdk()
 
     const originalEnvironments = await getEnvironmentsSortedByConvention(_projectInfo.name)
 
     const environments = (await _projectInfo.extensionDataManager.getValue<IEnvironmentInstance[]>(ExtensionDataKeys.Environments)) ?? []
 
+    const groupByStage = (await _projectInfo.extensionDataManager.getValue<boolean>(ExtensionDataKeys.GroupByStage)) ?? false
+
+    const onlySuccessFailed = (await _projectInfo.extensionDataManager.getValue<boolean>(ExtensionDataKeys.OnlySuccessFailed)) ?? false
+
     return {
         environments: new ArrayItemProvider(merge(originalEnvironments, environments)),
         projectInfo: _projectInfo,
+        groupByStage,
+        onlySuccessFailed,
     }
 }
 
@@ -94,6 +105,23 @@ const Settings = () => {
             })
         }
     }
+    const onToggleGroupByStage = async (value: boolean) => {
+        const dataManager = state.projectInfo?.extensionDataManager
+        // Optimistically reflect the toggle; persist in the background.
+        setState({ ...state, groupByStage: value })
+        if (dataManager) {
+            await dataManager.setValue<boolean>(ExtensionDataKeys.GroupByStage, value)
+        }
+    }
+
+    const onToggleOnlySuccessFailed = async (value: boolean) => {
+        const dataManager = state.projectInfo?.extensionDataManager
+        setState({ ...state, onlySuccessFailed: value })
+        if (dataManager) {
+            await dataManager.setValue<boolean>(ExtensionDataKeys.OnlySuccessFailed, value)
+        }
+    }
+
     const [state, setState] = React.useState<ISettingsContentState>({
         columns: [
             {
@@ -107,16 +135,20 @@ const Settings = () => {
         ],
         environments: new ArrayItemProvider<IEnvironmentInstance>([]),
         isLoading: true,
+        groupByStage: false,
+        onlySuccessFailed: false,
     })
 
     React.useEffect(() => {
         load()
-            .then(({ projectInfo, environments }) =>
+            .then(({ projectInfo, environments, groupByStage, onlySuccessFailed }) =>
                 setState({
                     ...state,
                     environments,
                     projectInfo,
                     isLoading: false,
+                    groupByStage,
+                    onlySuccessFailed,
                 })
             )
             .catch((err) => {
@@ -130,6 +162,8 @@ const Settings = () => {
             onTableRowDrop={onTableRowDrop}
             onResetToDefaultSortOrder={onResetToDefaultSortOrder}
             onSaveCustomSortOrder={onSaveCustomSortOrder}
+            onToggleGroupByStage={onToggleGroupByStage}
+            onToggleOnlySuccessFailed={onToggleOnlySuccessFailed}
         />
     )
 }

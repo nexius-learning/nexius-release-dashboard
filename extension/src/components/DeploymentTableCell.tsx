@@ -28,6 +28,14 @@ interface DeploymentTableCellProps {
     tableItem: IPipelineInstance
     buildName?: string
     approvalName?: string
+    version?: string
+    branch?: string
+    /**
+     * Actual environment name this cell renders. Defaults to tableColumn.id (one-column-per-environment
+     * mode). In stage-grouped mode the column id is a stage token, so the resolved per-row env name is
+     * passed here instead.
+     */
+    environmentName?: string
 }
 
 export const DeploymentTableCell: React.FC<DeploymentTableCellProps> = ({
@@ -36,6 +44,9 @@ export const DeploymentTableCell: React.FC<DeploymentTableCellProps> = ({
     tableItem,
     buildName,
     approvalName,
+    version,
+    branch,
+    environmentName,
 }) => {
     if (tableColumn.id === 'name') {
         return (
@@ -50,7 +61,7 @@ export const DeploymentTableCell: React.FC<DeploymentTableCellProps> = ({
             </SimpleTableCell>
         )
     }
-    const env = tableItem.environments[tableColumn.id]
+    const env = tableItem.environments[environmentName ?? tableColumn.id]
     return (
         <SimpleTableCell
             columnIndex={columnIndex}
@@ -65,7 +76,13 @@ export const DeploymentTableCell: React.FC<DeploymentTableCellProps> = ({
                         size={StatusSize.m}
                     />
                     <div className="flex-column wrap-text">
-                        <BuildNameCell buildName={buildName || env.value} uri={env.uri} />
+                        <BuildNameCell buildName={version || buildName || env.value} uri={env.uri} />
+                        {branch && (
+                            <div className="deployed-branch" title={`Deployed from ${branch}`}>
+                                <Icon iconName="OpenSource" size={IconSize.small} className="deployed-branch-icon" />
+                                {branch}
+                            </div>
+                        )}
                         <div className="finish-date">{env.finishTime && <SafeAgo date={env.finishTime} format={AgoFormat.Extended} />}</div>
                     </div>
                     {approvalName && (

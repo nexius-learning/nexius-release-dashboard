@@ -8,9 +8,12 @@ import {
     IPipelineInstance,
     IEnvironmentInstance,
 } from '../types'
-import { sortByConvention } from '../utilities'
+import { isShownDeploymentResult, sortByConvention } from '../utilities'
 
-export async function getDashboardEnvironmentPipeline(projectName: string): Promise<IDashboardEnvironmentPipeline> {
+export async function getDashboardEnvironmentPipeline(
+    projectName: string,
+    onlySuccessFailed = false
+): Promise<IDashboardEnvironmentPipeline> {
     const taskAgentClient = getClient(TaskAgentRestClient)
     const pipelinesClient = getClient(PipelinesRestClient)
 
@@ -27,6 +30,9 @@ export async function getDashboardEnvironmentPipeline(projectName: string): Prom
             pipeline: {},
         }
         for (const deployment of deployments) {
+            // With the setting on, ignore skipped/canceled/in-progress records so the kept record
+            // (first-per-pipeline = most recent) is the latest green/red deploy, not a skip.
+            if (onlySuccessFailed && !isShownDeploymentResult(deployment.result)) continue
             const pipeline = pipelines.find((p) => p.id == deployment.definition.id)
 
             // Pipelines that are removed may still have deployments, but we don't want to show them.

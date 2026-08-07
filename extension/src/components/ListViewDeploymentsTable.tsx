@@ -5,16 +5,18 @@ import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider'
 import { DeploymentTableCell } from './DeploymentTableCell'
 import { useBuildAndApprovalData } from '../hooks/useBuildAndApprovalData'
 import { extractBuildAndApprovalNames } from '../utils/pipelineUtils'
+import { groupColumnsByStage, resolveEnvNameForColumn } from '../utils/stageGrouping'
 
 export const ListViewDeploymentsTable = (props: {
     environments: IEnvironmentInstance[]
     pipelines: IPipelineInstance[]
     projectName?: string
+    groupByStage?: boolean
 }): JSX.Element => {
-    const { environments, pipelines, projectName } = props
+    const { environments, pipelines, projectName, groupByStage } = props
 
-    // Use the shared hook for fetching build and approval data
-    const { buildNames, approvalNames } = useBuildAndApprovalData(pipelines, projectName)
+    // Use the shared hook for fetching build, approval, version and branch data
+    const { buildNames, approvalNames, versions, branches } = useBuildAndApprovalData(pipelines, projectName)
 
     function getListViewColumns(environments: IEnvironmentInstance[]): Array<IDashboardEnvironmentColumn> {
         const columns: IDashboardEnvironmentColumn[] = []
@@ -28,10 +30,16 @@ export const ListViewDeploymentsTable = (props: {
             conventionSortOrder: 0,
         } as IDashboardEnvironmentColumn)
 
-        const dynamicColumns = environments.map((environment) => {
+        // In stage-grouped mode one column represents a deployment stage (id = `stage:<LABEL>`); otherwise
+        // one column per environment name (id = env name), preserving the upstream layout.
+        const columnSpecs = groupByStage
+            ? groupColumnsByStage(environments)
+            : environments.map((environment) => ({ id: environment.name!, label: environment.name! }))
+
+        const dynamicColumns = columnSpecs.map((spec) => {
             return {
-                id: environment.name,
-                name: environment.name,
+                id: spec.id,
+                name: spec.label,
                 renderCell: (index: number, columnIndex: number, tableColumn: IDashboardEnvironmentColumn, tableItem: IPipelineInstance) =>
                     renderCell(index, columnIndex, tableColumn, tableItem),
                 width: 200,
@@ -44,11 +52,19 @@ export const ListViewDeploymentsTable = (props: {
     const renderCell = (_index: number, columnIndex: number, tableColumn: IDashboardEnvironmentColumn, tableItem: IPipelineInstance) => {
         let buildName: string | undefined = undefined
         let approvalName: string | undefined = undefined
+        let version: string | undefined = undefined
+        let branch: string | undefined = undefined
+        let environmentName: string | undefined = undefined
 
         if (tableColumn.id !== 'name') {
-            const result = extractBuildAndApprovalNames(tableItem, tableColumn.id, buildNames, approvalNames)
-            buildName = result.buildName
-            approvalName = result.approvalName
+            environmentName = resolveEnvNameForColumn(tableItem, tableColumn.id)
+            if (environmentName) {
+                const result = extractBuildAndApprovalNames(tableItem, environmentName, buildNames, approvalNames, versions, branches)
+                buildName = result.buildName
+                approvalName = result.approvalName
+                version = result.version
+                branch = result.branch
+            }
         }
 
         return (
@@ -59,6 +75,9 @@ export const ListViewDeploymentsTable = (props: {
                 tableItem={tableItem}
                 buildName={buildName}
                 approvalName={approvalName}
+                version={version}
+                branch={branch}
+                environmentName={environmentName}
             />
         )
     }

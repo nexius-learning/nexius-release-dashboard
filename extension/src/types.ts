@@ -88,6 +88,8 @@ export interface IDashboardContentState {
     pipelines: IPipelineInstance[]
     isLoading: boolean
     projectInfo?: IDevOpsProjectInfo
+    /** When true, dashboard columns are grouped by deployment stage (DEV/QA/STG/PROD) instead of one-per-environment. */
+    groupByStage?: boolean
 }
 
 export interface ISortableByConvention {
@@ -99,6 +101,8 @@ export interface IEnvironmentInstance extends ISortableByConvention {}
 
 export enum ExtensionDataKeys {
     Environments = 'Environments',
+    GroupByStage = 'GroupByStage',
+    OnlySuccessFailed = 'OnlySuccessFailed',
 }
 
 export interface ISettingsContentProps {
@@ -106,6 +110,8 @@ export interface ISettingsContentProps {
     onTableRowDrop?: (event: BoltListDragEvent<HTMLElement, IEnvironmentInstance>, dropData: IListDropData) => void
     onSaveCustomSortOrder: () => void
     onResetToDefaultSortOrder: () => void
+    onToggleGroupByStage?: (value: boolean) => void
+    onToggleOnlySuccessFailed?: (value: boolean) => void
 }
 
 export interface ISettingsContentState {
@@ -114,6 +120,10 @@ export interface ISettingsContentState {
     projectInfo?: IDevOpsProjectInfo
     organisation?: string
     isLoading: boolean
+    /** When true, dashboard columns are grouped by deployment stage (DEV/QA/STG/PROD) instead of one-per-environment. */
+    groupByStage?: boolean
+    /** When true, only succeeded/failed deployments are shown; skipped/canceled/in-progress are hidden. */
+    onlySuccessFailed?: boolean
 }
 
 /**

@@ -3,7 +3,7 @@
     "id": "sixpivot-release-dashboard",
     "publisher": "sixpivot",
     "version": "1.0.128",
-    "name": "PivotPro Release Dashboard",
+    "name": "Nexius Release Dashboard",
     "description": "A dashboard to view a summary of all deployments",
     "demands": ["api-version/3.0"],
     "categories": ["Azure Pipelines"],
@@ -54,7 +54,7 @@
             "description": "PivotPro Release Dashboard page",
             "targets": ["ms.vss-build-web.build-release-hub-group"],
             "properties": {
-                "name": "PivotPro Release Dashboard",
+                "name": "Nexius Release Dashboard",
                 "uri": "dist/dashboard/dashboard.html",
                 "order": 1,
                 "icon": {
@@ -69,7 +69,7 @@
             "description": "PivotPro Release Dashboard settings",
             "targets": ["ms.vss-web.project-admin-hub-group"],
             "properties": {
-                "name": "PivotPro Release Dashboard settings",
+                "name": "Nexius Release Dashboard settings",
                 "uri": "dist/settings/settings.html",
                 "order": 1,
                 "icon": {

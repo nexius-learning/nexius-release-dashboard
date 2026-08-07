@@ -1,5 +1,28 @@
-import { merge, sortByConvention } from './utilities'
+import { isShownDeploymentResult, merge, sortByConvention } from './utilities'
 import { ISortableByConvention } from './types'
+
+// TaskResult codes: 0 Succeeded, 1 SucceededWithIssues, 2 Failed, 3 Canceled, 4 Skipped, 5 Abandoned.
+describe('isShownDeploymentResult', () => {
+    it('keeps green (succeeded / succeeded-with-issues) and red (failed)', () => {
+        expect(isShownDeploymentResult(0)).toBe(true)
+        expect(isShownDeploymentResult(1)).toBe(true)
+        expect(isShownDeploymentResult(2)).toBe(true)
+    })
+
+    it('drops skipped / canceled / abandoned / in-progress', () => {
+        expect(isShownDeploymentResult(4)).toBe(false)
+        expect(isShownDeploymentResult(3)).toBe(false)
+        expect(isShownDeploymentResult(5)).toBe(false)
+        expect(isShownDeploymentResult(undefined)).toBe(false)
+    })
+
+    it('handles a string result form defensively', () => {
+        expect(isShownDeploymentResult('succeeded')).toBe(true)
+        expect(isShownDeploymentResult('failed')).toBe(true)
+        expect(isShownDeploymentResult('skipped')).toBe(false)
+        expect(isShownDeploymentResult('canceled')).toBe(false)
+    })
+})
 
 describe('sortByConvention', () => {
     it('should sort by convention', () => {

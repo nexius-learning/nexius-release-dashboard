@@ -9,13 +9,15 @@ import { Button } from 'azure-devops-ui/Button'
 import { Page } from 'azure-devops-ui/Page'
 import { HeaderCommandBar, IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar'
 import { ListDragDropBehavior, ListDragImage } from 'azure-devops-ui/List'
+import { Toggle } from 'azure-devops-ui/Toggle'
 import { IEnvironmentInstance, ISettingsContentProps } from '../types'
 import './Settings.scss'
 import { downloadJson } from '../utilities'
 import { diagnostics } from '../diagnostics'
 
 export const SettingsContent = (props: ISettingsContentProps) => {
-    const { state, onResetToDefaultSortOrder, onSaveCustomSortOrder, onTableRowDrop } = props
+    const { state, onResetToDefaultSortOrder, onSaveCustomSortOrder, onTableRowDrop, onToggleGroupByStage, onToggleOnlySuccessFailed } =
+        props
     const environmentsCardHeaderCommandBarItems: IHeaderCommandBarItem[] = [
         {
             id: 'reset-sort-order-settings',
@@ -97,6 +99,40 @@ export const SettingsContent = (props: ISettingsContentProps) => {
             </CustomHeader>
 
             <div className="page-content page-content-top">
+                <Card
+                    className="bolt-card-white"
+                    titleProps={{ text: 'Column grouping' }}
+                    headerDescriptionProps={{
+                        text: 'Group dashboard columns by deployment stage (DEV/QA/STG/PROD) instead of one column per environment. Use this when environments are named per app and stage (e.g. Player-DEV, mediaforge-QA) to keep the grid from growing a column per app.',
+                    }}
+                >
+                    <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
+                        <Toggle
+                            offText={'One column per environment'}
+                            onText={'Group columns by stage'}
+                            checked={state.groupByStage ?? false}
+                            onChange={(_event, value) => onToggleGroupByStage && onToggleGroupByStage(value)}
+                        />
+                    </div>
+                </Card>
+
+                <Card
+                    className="bolt-card-white"
+                    titleProps={{ text: 'Deployment states' }}
+                    headerDescriptionProps={{
+                        text: 'Show only succeeded (green) and failed (red) deployments. Skipped, canceled and in-progress records are hidden, so a cell reflects the last real deploy (or nothing) instead of a skipped stage.',
+                    }}
+                >
+                    <div className="flex-row flex-center rhythm-horizontal-8 padding-vertical-8">
+                        <Toggle
+                            offText={'Show all deployment states'}
+                            onText={'Only succeeded / failed'}
+                            checked={state.onlySuccessFailed ?? false}
+                            onChange={(_event, value) => onToggleOnlySuccessFailed && onToggleOnlySuccessFailed(value)}
+                        />
+                    </div>
+                </Card>
+
                 <Card
                     headerCommandBarItems={environmentsCardHeaderCommandBarItems}
                     className="bolt-card-white bolt-table-card"

@@ -11,21 +11,23 @@ import { ITreeItemProvider } from 'azure-devops-ui/Utilities/TreeItemProvider'
 import { DeploymentTableCell } from './DeploymentTableCell'
 import { useBuildAndApprovalData } from '../hooks/useBuildAndApprovalData'
 import { extractBuildAndApprovalNames } from '../utils/pipelineUtils'
+import { groupColumnsByStage, resolveEnvNameForColumn } from '../utils/stageGrouping'
 
 export const TreeViewDeploymentsTable = (props: {
     environments: IEnvironmentInstance[]
     pipelines: IPipelineInstance[]
     projectName?: string
+    groupByStage?: boolean
 }): JSX.Element => {
-    const { environments, pipelines, projectName } = props
+    const { environments, pipelines, projectName, groupByStage } = props
     const [folderViewItemProvider, setFolderViewItemProvider] = useState<ITreeItemProvider<IDeploymentTableItem>>()
 
-    // Use the shared hook for fetching build and approval data
-    const { buildNames, approvalNames } = useBuildAndApprovalData(pipelines, projectName)
+    // Use the shared hook for fetching build, approval, version and branch data
+    const { buildNames, approvalNames, versions, branches } = useBuildAndApprovalData(pipelines, projectName)
 
     useEffect(() => {
         if (pipelines && environments) buildTreeView()
-    }, [pipelines, environments, buildNames, approvalNames])
+    }, [pipelines, environments, buildNames, approvalNames, versions, branches])
 
     const buildTreeView = () => {
         let treeNodeItems: ITreeItem<IDeploymentTableItem>[] = []
@@ -83,11 +85,16 @@ export const TreeViewDeploymentsTable = (props: {
             renderCell: renderExpandableTreeCell,
         })
 
-        let dynamicColumns = environments.map((env) => {
+        // Stage-grouped: one column per deployment stage (id = `stage:<LABEL>`); otherwise one per env name.
+        const columnSpecs = groupByStage
+            ? groupColumnsByStage(environments)
+            : environments.map((env) => ({ id: env.name!, label: env.name! }))
+
+        let dynamicColumns = columnSpecs.map((spec) => {
             return {
-                id: env.name!,
-                name: env.name,
-                width: !env.name ? 300 : 200,
+                id: spec.id,
+                name: spec.label,
+                width: !spec.label ? 300 : 200,
                 renderCell: renderTreeViewCell,
                 isFixedColumn: true,
             }
@@ -115,8 +122,11 @@ export const TreeViewDeploymentsTable = (props: {
             )
         }
 
+        // Resolve the column (env name, or a `stage:<LABEL>` token in grouped mode) to this row's env name.
+        const environmentName = pipeline ? resolveEnvNameForColumn(pipeline, treeColumn.id) : undefined
+
         // If there's no pipeline (folder node) or no environment data for this pipeline
-        if (!pipeline || !pipeline.environments[treeColumn!.name!]) {
+        if (!pipeline || !environmentName || !pipeline.environments[environmentName]) {
             return (
                 <SimpleTableCell key={'col-' + columnIndex} columnIndex={columnIndex}>
                     <div className="no-data">-</div>
@@ -124,8 +134,15 @@ export const TreeViewDeploymentsTable = (props: {
             )
         }
 
-        // Extract build and approval names using shared utility
-        const { buildName, approvalName } = extractBuildAndApprovalNames(pipeline, treeColumn!.name!, buildNames, approvalNames)
+        // Extract build, approval, version and branch using shared utility
+        const { buildName, approvalName, version, branch } = extractBuildAndApprovalNames(
+            pipeline,
+            environmentName,
+            buildNames,
+            approvalNames,
+            versions,
+            branches
+        )
 
         // Create a compatible table column for DeploymentTableCell
         const tableColumn: IDashboardEnvironmentColumn = {
@@ -145,6 +162,9 @@ export const TreeViewDeploymentsTable = (props: {
                 tableItem={pipeline}
                 buildName={buildName}
                 approvalName={approvalName}
+                version={version}
+                branch={branch}
+                environmentName={environmentName}
             />
         )
     }

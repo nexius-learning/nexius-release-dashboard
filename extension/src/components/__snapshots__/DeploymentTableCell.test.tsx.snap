@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DeploymentTableCell renders the build name and finish date 1`] = `
 <div>
@@ -57,14 +57,14 @@ exports[`DeploymentTableCell renders the build name and finish date 1`] = `
                   class="finish-date"
                 >
                   <span
-                    aria-label="Jun 29 at 12:00 PM Jun 29, 2025 at 12:00 PM UTC"
+                    aria-label="Jun 29, 2025 at 12:00 PM Jun 29, 2025 at 12:00 PM UTC"
                     class="text-ellipsis"
                   >
                     <time
                       class="bolt-time-item white-space-nowrap"
                       datetime="2025-06-29T12:00:00.000Z"
                     >
-                      Jun 29 at 12:00 PM
+                      Jun 29, 2025 at 12:00 PM
                     </time>
                   </span>
                 </div>

@@ -33,15 +33,20 @@ ReactDOM.render(<Dashboard />, document.getElementById('root'))
 async function load(): Promise<IDashboardContentState> {
     const projectInfo = await initAzureDevOpsSdk()
 
-    const { environments, pipelines } = await getDashboardEnvironmentPipeline(projectInfo.name)
+    const onlySuccessFailed = (await projectInfo.extensionDataManager.getValue<boolean>(ExtensionDataKeys.OnlySuccessFailed)) ?? false
+
+    const { environments, pipelines } = await getDashboardEnvironmentPipeline(projectInfo.name, onlySuccessFailed)
 
     const sortedEnvironments =
         (await projectInfo.extensionDataManager.getValue<IEnvironmentInstance[]>(ExtensionDataKeys.Environments)) ?? []
+
+    const groupByStage = (await projectInfo.extensionDataManager.getValue<boolean>(ExtensionDataKeys.GroupByStage)) ?? false
 
     return {
         environments: merge(environments, sortedEnvironments) ?? environments,
         pipelines: pipelines,
         projectInfo: projectInfo,
         isLoading: false,
+        groupByStage,
     }
 }
