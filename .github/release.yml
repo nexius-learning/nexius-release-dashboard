@@ -1,0 +1,12 @@
+# Categorises GitHub's auto-generated release notes (used by `gh release create --generate-notes`).
+# PRs are grouped by label; Dependabot PRs carry the "dependencies" label automatically.
+changelog:
+  categories:
+    - title: Features & enhancements
+      labels: [feature, enhancement]
+    - title: Fixes
+      labels: [fix, bug]
+    - title: Dependencies
+      labels: [dependencies]
+    - title: Other changes
+      labels: ['*']
