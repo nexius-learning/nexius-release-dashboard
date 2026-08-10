@@ -50,7 +50,6 @@
         "jest": "^30.0.5",
         "jest-dom": "^4.0.0",
         "jest-environment-jsdom": "^30.0.5",
-        "nerdbank-gitversioning": "^3.6.65-alpha",
         "prettier": "^3.3.3",
         "rimraf": "^6.0.1",
         "sass": "^1.102.0",
