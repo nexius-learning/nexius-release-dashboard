@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "github-actions" # See documentation for possible values
-    directory: "/extension" # Location of package manifests
+  - package-ecosystem: "github-actions" # keeps our workflow action versions current
+    directory: "/" # workflows live at .github/workflows (repo root), not /extension
     schedule:
       interval: "weekly"
