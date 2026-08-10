@@ -1,4 +1,4 @@
-# PivotPro Release Dashboard
+# Nexius Release Dashboard — developer guide
 
 Local development and debugging of the extension (except for the most simple changes) will generally require that you have access to an Azure DevOps organisation that you can publish your own 'dev' copy of the extension, which alters the baseUri to point to your local machine.
 
@@ -32,16 +32,16 @@ While Azure DevOps extensions support building on Node 18.x, this extension also
     ![Entering organization name to share extension with](../assets/publisher-extension-shared-org.png)
 
 1. Now navigate back to your Azure DevOps organisation and go to **Organization settings**, then **Extensions** and **Shared**
-1. Click on the **Release Dashboard (Dev)** extension and then **Install**
+1. Click on the **Nexius Release Dashboard (Dev)** extension and then **Install**
 1. Follow the prompts to finish installing the extension into your organisation.
 
 ## Local development
 
 1. `npm run start:dev`
 1. Go to <localhost:3000> in your browser. You should get an untrusted certificate error page. Select **Advanced** and then select **Accept the Risk and Continue**.
-1. In Azure DevOps, open a project and go to the **Azure Pipelines** section and click on the **PivotPro Release Dashboard** item that links to a page ending in `sixpivot-release-dashboard-dev.deployment-dashboard` (Note the `-dev` in the name!)
+1. In Azure DevOps, open a project and go to the **Azure Pipelines** section and click on the **Nexius Release Dashboard (Dev)** item that links to a page ending in `-dev.deployment-dashboard` (note the `-dev` in the name!)
 
-    ![Dev PivotPro Release Dashboard](../assets/azure-pipelines-menu-dev-extension.png)
+    ![Dev Nexius Release Dashboard](../assets/azure-pipelines-menu-dev-extension.png)
 
 1. You can now make local changes to the extension code. As this extension is pointing back to <https://localhost:3000> you should be ready to make changes to your code and see it hot-reload.
 
@@ -71,7 +71,6 @@ The pre-commit hook will prevent you from committing code if prettier encounters
 
 ## Developer resources
 
-- [Miro board used for brainstorming](https://miro.com/app/board/uXjVP7LsQgA=/)
 - Azure DevOps Extensions
   - [Azure DevOps Developer portal](https://developer.microsoft.com/en-gb/azure-devops/)
   - [Overview](https://learn.microsoft.com/azure/devops/extend/overview?toc=%2Fazure%2Fdevops%2Fmarketplace-extensibility%2Ftoc.json&view=azure-devops&WT.mc_id=DOP-MVP-5001655)
@@ -80,7 +79,7 @@ The pre-commit hook will prevent you from committing code if prettier encounters
 - [Scopes](https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/integrate/includes/scopes.md)
 - [Extension API docs](https://learn.microsoft.com/en-us/javascript/api/azure-devops-extension-api/?WT.mc_id=DOP-MVP-5001655)
 - Azure DevOps REST APIs
-  - [Environments](https://learn.microsoft.com/rest/api/azure/devops/distributedtask/environments/list?view=azure-devops-rest-6.0&WT.mc_id=DOP-MVP-5001655) [Example](https://dev.azure.com/sixpivot/ReleaseDashboard/_apis/distributedtask/environments/5?api-version=6.0-preview.1)
-  - [Environmentdeployment Records](https://learn.microsoft.com/en-us/rest/api/azure/devops/distributedtask/environmentdeployment-records?view=azure-devops-rest-6.0&WT.mc_id=DOP-MVP-5001655) [Example for Dev](https://dev.azure.com/sixpivot/ReleaseDashboard/_apis/distributedtask/environments/5/environmentdeploymentrecords?api-version=7.1&top=1) [Example for Prod](https://dev.azure.com/sixpivot/ReleaseDashboard/_apis/distributedtask/environments/7/environmentdeploymentrecords?api-version=7.1&top=1)
-  - [Approval query](https://learn.microsoft.com/rest/api/azure/devops/approvalsandchecks/approvals/query?view=azure-devops-rest-7.1&WT.mc_id=DOP-MVP-5001655) [Example](https://dev.azure.com/sixpivot/ReleaseDashboard/_apis/pipelines/approvals?api-version=7.1&state=approved&$expand=steps)
-  - [Build Timeline](https://learn.microsoft.com/rest/api/azure/devops/build/timeline/get?view=azure-devops-rest-7.1&WT.mc_id=DOP-MVP-5001655) [Example](https://dev.azure.com/sixpivot/ReleaseDashboard/_apis/build/builds/5058/timeline)
+  - [Environments](https://learn.microsoft.com/rest/api/azure/devops/distributedtask/environments/list?view=azure-devops-rest-6.0&WT.mc_id=DOP-MVP-5001655) [Example](https://dev.azure.com/{your-org}/{your-project}/_apis/distributedtask/environments/5?api-version=6.0-preview.1)
+  - [Environmentdeployment Records](https://learn.microsoft.com/en-us/rest/api/azure/devops/distributedtask/environmentdeployment-records?view=azure-devops-rest-6.0&WT.mc_id=DOP-MVP-5001655) [Example for Dev](https://dev.azure.com/{your-org}/{your-project}/_apis/distributedtask/environments/5/environmentdeploymentrecords?api-version=7.1&top=1) [Example for Prod](https://dev.azure.com/{your-org}/{your-project}/_apis/distributedtask/environments/7/environmentdeploymentrecords?api-version=7.1&top=1)
+  - [Approval query](https://learn.microsoft.com/rest/api/azure/devops/approvalsandchecks/approvals/query?view=azure-devops-rest-7.1&WT.mc_id=DOP-MVP-5001655) [Example](https://dev.azure.com/{your-org}/{your-project}/_apis/pipelines/approvals?api-version=7.1&state=approved&$expand=steps)
+  - [Build Timeline](https://learn.microsoft.com/rest/api/azure/devops/build/timeline/get?view=azure-devops-rest-7.1&WT.mc_id=DOP-MVP-5001655) [Example](https://dev.azure.com/{your-org}/{your-project}/_apis/build/builds/5058/timeline)

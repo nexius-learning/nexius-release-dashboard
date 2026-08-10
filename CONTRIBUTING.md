@@ -1,10 +1,6 @@
 # Contributing
 
-## Feedback
-
-If you would like to leave a review for the extension in the marketplace, leave it [here](https://marketplace.visualstudio.com/items?itemName=SixPivot.sixpivot-release-dashboard&ssr=false#review-details)
-
-### Reporting bugs
+## Reporting bugs
 
 Please report bugs in GitHub.  
 
@@ -22,8 +18,6 @@ Code contributions can be made via pull requests, and we prefer the [shared repo
 For a background on contributing to open source, you can read the [github guide](https://opensource.guide/how-to-contribute/).
 
 #### Pull Requests
-
-A few disclaimers: We might not have time to review and merge your pull request 😐 Our review might have feedback that we can't help with - but we will try!
 
 If you do make a PR:
 

@@ -1,16 +1,23 @@
-# PivotPro Release Dashboard for Pipelines
+# Nexius Release Dashboard
 
-This dashboard lets you easily see an overview of all your recent pipeline deployments including:
+A deployment overview for the Azure Pipelines hub — see all your recent
+pipeline deployments at a glance:
 
-  - Pipeline name
-  - Date and time of deployments
-  - Failure or success status
-  - Which environments have been released to
-  - Name of deployments
+- Pipeline name
+- Deployed app version and source branch
+- Success / failure status and time
+- Which environments have been deployed to
+- Approver, where an approval gate was used
 
-You’ll find this helpful if your team has:
+You'll find this helpful if your teams have:
 
-  - Automated deployments - you’ll be able to see which ones have failed so you can re-release or-rollback/roll forward
-  - Pipeline folders - you’ll have better visibility of yow many pipelines are sitting within
-  - Multiple environments - you’ll be able to see which ones are on different deployments based on the name
-  - Multiple components - you’ll be able deploy to the same environment
+- **Automated deployments** — spot the failed ones so you can re-release or
+  roll back / forward.
+- **Many pipelines** — folder grouping gives better visibility of what's
+  deployed where.
+- **Multiple environments** — optionally group columns by stage
+  (DEV / QA / STG / PROD) instead of one column per environment.
+- **Noise from skipped stages** — optionally show only succeeded / failed
+  deployments.
+
+Both options are on the **Settings** page.

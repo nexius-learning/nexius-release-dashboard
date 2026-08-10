@@ -1,29 +1,35 @@
-[![Build Status](https://dev.azure.com/sixpivot/ReleaseDashboard/_apis/build/status%2FPublish%20(GitHub)?branchName=main)](https://dev.azure.com/sixpivot/ReleaseDashboard/_build/latest?definitionId=78&branchName=main)
+# Nexius Release Dashboard
 
-# Introduction
+An Azure DevOps extension that adds a deployment-overview page to the Azure
+Pipelines hub — a summary of recent deployments across your YAML pipelines and
+ADO Environments.
 
-An Azure DevOps extension that shows a Deployment Summary page within the Azure Pipelines hub.
+It adds a **Nexius Release Dashboard** item to the Pipelines menu. The grid
+shows, per pipeline and environment: the deployed app version, the source
+branch, deployment status and time — plus the approver where an approval gate
+was used.
 
-See the extension in the Visual Studio Marketplace [here](https://marketplace.visualstudio.com/items?itemName=SixPivot.sixpivot-release-dashboard)
+## Nexius additions over upstream
 
-The extension adds a 'PivotPro Release Dashboard' item to the Pipelines menu
+- **Deployed version + source branch per cell** — resolves the consumed app
+  build version from the deploy run (not just the deploy run number) and the
+  branch it came from.
+- **Group columns by stage** (opt-in) — collapse per-app-per-stage
+  environments (e.g. `Player-DEV`, `mediaforge-QA`) into DEV / QA / STG / PROD
+  columns, so the grid doesn't grow a column per app.
+- **Only succeeded / failed** (opt-in) — hide skipped, canceled and
+  in-progress records, so a cell shows the last real deploy rather than a
+  skipped stage.
 
-![Menu showing PivotPro Release Dashboard menu item](extension/img/menu-screenshot.png)
+Both options are toggles on the dashboard **Settings** page (default off).
 
-Selecting this loads the PivotPro Release Dashboard page (this may take a while depending on how many environments and deployments you have)
+## Development & publishing
 
-![Example PivotPro Release Dashboard screenshot](extension/img/dashboard-screenshot.png)
+- [Developer guide](extension/DEV_GUIDE.md) — local dev, hot reload, debugging.
+- [Contributing](./CONTRIBUTING.md) — code style and PR guidance.
+- [Publishing](./PUBLISHING.md) — automated via CI on a version bump.
 
-You can configure the extension via the Settings page, including reordering the environment. The default order is alphabetical, which can result in 'prod' appearing before 'test'!
+## Credits
 
-![Settings page screenshot](extension/img/settings-screenshot.png)
-
-You reorder the environments by dragging them up or down and clicking **Save**.
-
-You can restore the default order by clicking **Reset to default**
-
-## Contributing
-
-Contributions are welcome. See our [Contribution guide](./CONTRIBUTING.md)
-
-See [the developer guide](extension/DEV_GUIDE.md) to get started developing.
+A fork of SixPivot's [PivotPro Release Dashboard](https://github.com/SixPivot/AzureDevopsDeploymentDashboard),
+used under the MIT License — see [LICENSE](./LICENSE.md).
