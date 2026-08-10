@@ -45,7 +45,7 @@
     "scopes": ["vso.build", "vso.release", "vso.environment_manage"],
     "repository": {
         "type": "git",
-        "uri": "https://github.com/SixPivot/PivotProReleaseDashboard"
+        "uri": "https://github.com/nexius-learning/nexius-release-dashboard"
     },
     "contributions": [
         {
