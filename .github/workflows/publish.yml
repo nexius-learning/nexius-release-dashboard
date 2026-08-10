@@ -15,6 +15,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     if: github.repository == 'nexius-learning/nexius-release-dashboard'
+    permissions:
+      contents: write # create the git tag + GitHub release
     defaults:
       run:
         working-directory: extension
@@ -45,6 +47,7 @@ jobs:
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "No version bump in configs/nexius.json — skipping publish."
           fi
+          echo "version=$(node -p "require('./extension/configs/nexius.json').version")" >> "$GITHUB_OUTPUT"
 
       - name: Publish to ADO Marketplace
         if: steps.ver.outputs.publish == 'true'
@@ -57,3 +60,13 @@ jobs:
           --no-wait-validation
         env:
           MARKETPLACE_PAT: ${{ secrets.AZURE_DEVOPS_MARKETPLACE_PAT }}
+
+      - name: Create GitHub release
+        if: steps.ver.outputs.publish == 'true'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ steps.ver.outputs.version }}"
+          # Auto-generated notes (categorised by .github/release.yml) from PRs since the last release.
+          gh release create "$TAG" --title "$TAG" --generate-notes --target "$GITHUB_SHA"
