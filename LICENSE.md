@@ -1,6 +1,7 @@
 # MIT License
 
 Copyright (c) 2024 SixPivot
+Copyright (c) 2026 Bitwit Zrt.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

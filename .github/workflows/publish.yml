@@ -15,6 +15,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     if: github.repository == 'nexius-learning/nexius-release-dashboard'
+    environment: marketplace # holds the Marketplace PAT; deployments restricted to main
     permissions:
       contents: write # create the git tag + GitHub release
     defaults:
@@ -47,7 +48,13 @@ jobs:
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "No version bump in configs/nexius.json — skipping publish."
           fi
-          echo "version=$(node -p "require('./extension/configs/nexius.json').version")" >> "$GITHUB_OUTPUT"
+          VERSION=$(node -p "require('./extension/configs/nexius.json').version")
+          # Strict semver guard: the value is interpolated into later steps, so never
+          # let a crafted "version" from a merged change reach the shell unvalidated.
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Invalid version in configs/nexius.json: $VERSION"; exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Publish to ADO Marketplace
         if: steps.ver.outputs.publish == 'true'
@@ -66,7 +73,8 @@ jobs:
         working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.ver.outputs.version }} # env-indirected — never inline ${{ }} into the script
         run: |
-          TAG="v${{ steps.ver.outputs.version }}"
+          TAG="v${VERSION}"
           # Auto-generated notes (categorised by .github/release.yml) from PRs since the last release.
           gh release create "$TAG" --title "$TAG" --generate-notes --target "$GITHUB_SHA"

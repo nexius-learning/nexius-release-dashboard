@@ -1,7 +1,7 @@
 {
     "manifestVersion": 1,
-    "id": "sixpivot-release-dashboard",
-    "publisher": "sixpivot",
+    "id": "nexius-release-dashboard",
+    "publisher": "BitwitZrt",
     "version": "1.0.128",
     "name": "Nexius Release Dashboard",
     "description": "A dashboard to view a summary of all deployments",
@@ -51,7 +51,7 @@
         {
             "id": "deployment-dashboard",
             "type": "ms.vss-web.hub",
-            "description": "PivotPro Release Dashboard page",
+            "description": "Nexius Release Dashboard page",
             "targets": ["ms.vss-build-web.build-release-hub-group"],
             "properties": {
                 "name": "Nexius Release Dashboard",
@@ -66,7 +66,7 @@
         {
             "id": "deployment-dashboard-settings",
             "type": "ms.vss-web.hub",
-            "description": "PivotPro Release Dashboard settings",
+            "description": "Nexius Release Dashboard settings",
             "targets": ["ms.vss-web.project-admin-hub-group"],
             "properties": {
                 "name": "Nexius Release Dashboard settings",

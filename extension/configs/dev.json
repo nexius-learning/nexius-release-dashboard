@@ -1,7 +1,7 @@
 {
-    "id": "sixpivot-release-dashboard-dev",
-    "publisher": "SixPivot",
-    "name": "Release Dashboard (Dev)",
+    "id": "nexius-release-dashboard-dev",
+    "publisher": "BitwitZrt",
+    "name": "Nexius Release Dashboard (Dev)",
     "public": false,
     "baseUri": "https://localhost:3000"
 }
