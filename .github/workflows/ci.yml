@@ -7,6 +7,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -26,3 +29,12 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run compile
+
+  # Flags known-malicious / vulnerable dependency changes on PRs. Needs the dependency
+  # graph, which is free on public repos only — hence the visibility gate.
+  dependency-review:
+    if: github.event_name == 'pull_request' && !github.event.repository.private
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/dependency-review-action@v4

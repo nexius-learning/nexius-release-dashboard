@@ -20,9 +20,10 @@ fail on a duplicate version. You can also trigger the workflow manually
 - **Publisher** `BitwitZrt`, **extension id** `nexius-release-dashboard`
   (see `extension/configs/nexius.json`). Private extension, shared to the
   Nexius organization.
-- **Repo secret** `AZURE_DEVOPS_MARKETPLACE_PAT` — a Marketplace (Manage) PAT
-  of the `subscriptions@nexius.hu` service account, which is a member of the
-  BitwitZrt publisher. CI authenticates as this account.
+- **Secret** `AZURE_DEVOPS_MARKETPLACE_PAT` — a Marketplace (Manage) PAT of a
+  Nexius service account that is a member of the BitwitZrt publisher. CI
+  authenticates as that account. Which account holds it is documented
+  internally, not here.
 
 ## Manual fallback
 

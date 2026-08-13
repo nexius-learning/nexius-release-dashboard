@@ -42,7 +42,7 @@ export const SettingsContent = (props: ISettingsContentProps) => {
         {
             iconProps: { iconName: 'ViewDashboard' },
             id: 'deployment-dashboard',
-            tooltipProps: { text: 'Navigate to PivotPro Release Dashboard' },
+            tooltipProps: { text: 'Navigate to Nexius Release Dashboard' },
             isPrimary: true,
             important: true,
             href: state.projectInfo?.deploymentDashboardUri,
@@ -90,10 +90,10 @@ export const SettingsContent = (props: ISettingsContentProps) => {
                 <HeaderTitleArea>
                     <HeaderTitleRow>
                         <HeaderTitle ariaLevel={3} className="text-ellipsis" titleSize={TitleSize.Large}>
-                            PivotPro Release Dashboard Settings
+                            Nexius Release Dashboard Settings
                         </HeaderTitle>
                     </HeaderTitleRow>
-                    <HeaderDescription>Customise PivotPro Release Dashboard</HeaderDescription>
+                    <HeaderDescription>Customise Nexius Release Dashboard</HeaderDescription>
                 </HeaderTitleArea>
                 <HeaderCommandBar items={pageHeaderCommandBarItems} />
             </CustomHeader>

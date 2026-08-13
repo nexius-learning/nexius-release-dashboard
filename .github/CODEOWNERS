@@ -1,0 +1,4 @@
+# High-scrutiny paths: changes here can affect the publish pipeline / supply chain.
+/.github/workflows/ @varga-istvan-nx
+/extension/package-lock.json @varga-istvan-nx
+/extension/package.json @varga-istvan-nx
