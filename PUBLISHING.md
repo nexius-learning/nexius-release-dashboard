@@ -6,14 +6,18 @@ Nexius service account — no personal tokens, no manual steps.
 ## How it works
 
 1. In a PR, bump `version` in [`extension/configs/nexius.json`](extension/configs/nexius.json).
+   Changes under `extension/configs/` require a code-owner review.
 2. Merge to `main`.
 3. The [Publish workflow](.github/workflows/publish.yml) runs on the merge —
-   it builds, tests, and (because the version changed) publishes the new
-   version to the Marketplace.
+   it builds and tests, then **waits for a maintainer to approve the
+   `marketplace` environment deployment**. Only after that approval does it
+   publish the new version to the Marketplace and create the GitHub release.
 
-Merges that don't change the version don't publish, so ordinary changes never
-fail on a duplicate version. You can also trigger the workflow manually
-(**workflow_dispatch**) to force a publish of the current version.
+A merged version bump alone never ships anything: the environment approval is
+a separate, explicit human gate. Merges that don't change the version don't
+publish at all, so ordinary changes never fail on a duplicate version. You can
+also trigger the workflow manually (**workflow_dispatch**) to force a publish
+of the current version — the same environment approval applies.
 
 ## Configuration
 
