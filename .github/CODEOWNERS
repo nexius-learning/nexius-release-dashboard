@@ -2,3 +2,4 @@
 /.github/workflows/ @varga-istvan-nx
 /extension/package-lock.json @varga-istvan-nx
 /extension/package.json @varga-istvan-nx
+/extension/configs/ @varga-istvan-nx
