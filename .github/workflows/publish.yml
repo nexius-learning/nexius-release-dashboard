@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: marketplace # holds the Marketplace PAT; approval + main-only deployments
     permissions:
-      contents: write # create the git tag + GitHub release
+      contents: read
     defaults:
       run:
         working-directory: extension
@@ -99,17 +99,29 @@ jobs:
         env:
           MARKETPLACE_PAT: ${{ secrets.AZURE_DEVOPS_MARKETPLACE_PAT }}
 
+  # Tagging and the GitHub release are bookkeeping, not a deployment: they live outside the
+  # marketplace environment. That is also the only shape observed to work — creating a release
+  # from inside the gated job fails with "Resource not accessible by integration" even though the
+  # token reports contents:write, while this exact configuration succeeds consistently.
+  release:
+    needs: [check, publish]
+    if: needs.check.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the git tag + GitHub release
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
       - name: Create GitHub release
-        working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.check.outputs.version }} # env-indirected — never inline ${{ }} into the script
         run: |
           TAG="v${VERSION}"
-          # This step runs after the marketplace publish, so failing here leaves a version
-          # shipped with no release to point at. A 403 was observed once while repository
-          # permission state was still settling, hence: skip if it already exists, and retry
-          # before giving up.
+          # The extension is already on the Marketplace by this point, so this must not fail
+          # silently: skip when the release exists (safe re-runs) and retry before giving up.
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists — nothing to do."
             exit 0
