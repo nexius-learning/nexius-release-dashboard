@@ -29,7 +29,8 @@
         "react-dom": "^16.8.6"
     },
     "devDependencies": {
-        "@babel/preset-env": "^7.28.3",
+        "@babel/core": "^8.0.1",
+        "@babel/preset-env": "^8.0.2",
         "@jest/globals": "^30.4.1",
         "@testing-library/dom": "^10.3.2",
         "@testing-library/jest-dom": "^6.4.6",
@@ -64,6 +65,11 @@
         "webpack": "^5.94.0",
         "webpack-cli": "^6.0.1",
         "webpack-dev-server": "^5.2.6"
+    },
+    "overrides": {
+        "ts-jest": {
+            "@babel/core": "$@babel/core"
+        }
     },
     "engines": {
         "npm": ">=8",
