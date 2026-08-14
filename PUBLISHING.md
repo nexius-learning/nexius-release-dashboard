@@ -11,7 +11,8 @@ Nexius service account — no personal tokens, no manual steps.
 3. The [Publish workflow](.github/workflows/publish.yml) runs on the merge —
    it builds and tests, then **waits for a maintainer to approve the
    `marketplace` environment deployment**. Only after that approval does it
-   publish the new version to the Marketplace and create the GitHub release.
+   publish the new version to the Marketplace. Tagging and the GitHub release
+   follow in a separate job once the publish succeeds.
 
 A merged version bump alone never ships anything: the environment approval is
 a separate, explicit human gate. Merges that don't change the version don't
