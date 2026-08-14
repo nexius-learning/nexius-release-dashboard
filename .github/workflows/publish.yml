@@ -106,5 +106,22 @@ jobs:
           VERSION: ${{ needs.check.outputs.version }} # env-indirected — never inline ${{ }} into the script
         run: |
           TAG="v${VERSION}"
-          # Auto-generated notes (categorised by .github/release.yml) from PRs since the last release.
-          gh release create "$TAG" --title "$TAG" --generate-notes --target "$GITHUB_SHA"
+          # This step runs after the marketplace publish, so failing here leaves a version
+          # shipped with no release to point at. A 403 was observed once while repository
+          # permission state was still settling, hence: skip if it already exists, and retry
+          # before giving up.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — nothing to do."
+            exit 0
+          fi
+          for attempt in 1 2 3; do
+            # Auto-generated notes (categorised by .github/release.yml) from PRs since the last release.
+            if gh release create "$TAG" --title "$TAG" --generate-notes --target "$GITHUB_SHA"; then
+              exit 0
+            fi
+            echo "Creating release $TAG failed (attempt $attempt/3)."
+            [ "$attempt" -lt 3 ] && sleep 15
+          done
+          echo "Could not create release $TAG. The extension WAS published to the Marketplace —"
+          echo "create the release manually against $GITHUB_SHA, or re-run this job."
+          exit 1
