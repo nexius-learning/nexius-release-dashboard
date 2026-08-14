@@ -18,6 +18,17 @@ module.exports = {
         extensions: ['.ts', '.tsx', '.js'],
         alias: {
             'azure-devops-extension-sdk': path.resolve('node_modules/azure-devops-extension-sdk'),
+            // azure-devops-extension-api v5 added an "exports" map listing only the package root and
+            // one entry per API area, which stops Common/RestClientBase — the base class our custom
+            // Approvals client extends — from resolving. The file still ships unchanged and is still
+            // what every generated client derives from; only its subpath export is missing. Point at
+            // the CommonJS build so it stays a single copy alongside the rest of the package, which
+            // resolves through the "require" condition because ts-loader emits AMD.
+            // Upstream: https://github.com/microsoft/azure-devops-extension-api/issues/210 — remove
+            // this alias once that exports entry ships.
+            'azure-devops-extension-api/Common/RestClientBase': path.resolve(
+                'node_modules/azure-devops-extension-api/Common/RestClientBase.js'
+            ),
         },
     },
     stats: {
