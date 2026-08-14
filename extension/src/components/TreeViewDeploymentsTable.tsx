@@ -184,6 +184,9 @@ export const TreeViewDeploymentsTable = (props: {
                         folderViewItemProvider!.toggle(treeItem.underlyingItem)
                     }}
                     scrollable={true}
+                    // Render every row — with page-level scrolling, virtualization would stop
+                    // materializing rows after the first viewport.
+                    virtualize={false}
                 />
             )}
         </>

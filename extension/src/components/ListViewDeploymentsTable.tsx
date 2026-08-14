@@ -1,11 +1,17 @@
-import { Table } from 'azure-devops-ui/Table'
-import React from 'react'
+import { ColumnSorting, SortOrder, Table } from 'azure-devops-ui/Table'
+import React, { useMemo, useState } from 'react'
 import { IDashboardEnvironmentColumn, IEnvironmentInstance, IPipelineInstance } from '../types'
 import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider'
 import { DeploymentTableCell } from './DeploymentTableCell'
 import { useBuildAndApprovalData } from '../hooks/useBuildAndApprovalData'
 import { extractBuildAndApprovalNames } from '../utils/pipelineUtils'
 import { groupColumnsByStage, resolveEnvNameForColumn } from '../utils/stageGrouping'
+import { compareByColumnFinishTime, compareByName } from '../utils/pipelineFiltering'
+
+interface ISortState {
+    columnIndex: number
+    order: SortOrder
+}
 
 export const ListViewDeploymentsTable = (props: {
     environments: IEnvironmentInstance[]
@@ -14,11 +20,39 @@ export const ListViewDeploymentsTable = (props: {
     groupByStage?: boolean
 }): JSX.Element => {
     const { environments, pipelines, projectName, groupByStage } = props
+    const [sorting, setSorting] = useState<ISortState | undefined>(undefined)
 
     // Use the shared hook for fetching build, approval, version and branch data
     const { buildNames, approvalNames, versions, branches } = useBuildAndApprovalData(pipelines, projectName)
 
-    function getListViewColumns(environments: IEnvironmentInstance[]): Array<IDashboardEnvironmentColumn> {
+    // In stage-grouped mode one column represents a deployment stage (id = `stage:<LABEL>`); otherwise
+    // one column per environment name (id = env name), preserving the upstream layout.
+    const columnSpecs = useMemo(
+        () =>
+            groupByStage
+                ? groupColumnsByStage(environments)
+                : environments.map((environment) => ({ id: environment.name!, label: environment.name! })),
+        [environments, groupByStage]
+    )
+
+    // Column-click sorting: the name column sorts alphabetically; an environment/stage column sorts
+    // by that column's latest deployment time (rows never deployed there go last).
+    const sortedPipelines = useMemo(() => {
+        if (!sorting) return pipelines
+        const comparator = sorting.columnIndex === 0 ? compareByName : compareByColumnFinishTime(columnSpecs[sorting.columnIndex - 1].id)
+        const sorted = [...pipelines].sort(comparator)
+        return sorting.order === SortOrder.descending ? sorted.reverse() : sorted
+    }, [pipelines, sorting, columnSpecs])
+
+    const sortingBehavior = useMemo(
+        () =>
+            new ColumnSorting<IPipelineInstance>((columnIndex: number, proposedSortOrder: SortOrder) =>
+                setSorting({ columnIndex, order: proposedSortOrder })
+            ),
+        []
+    )
+
+    function getListViewColumns(): Array<IDashboardEnvironmentColumn> {
         const columns: IDashboardEnvironmentColumn[] = []
 
         columns.push({
@@ -28,21 +62,17 @@ export const ListViewDeploymentsTable = (props: {
                 renderCell(index, columnIndex, tableColumn, tableItem),
             width: 250,
             conventionSortOrder: 0,
+            sortProps: sorting?.columnIndex === 0 ? { sortOrder: sorting.order } : {},
         } as IDashboardEnvironmentColumn)
 
-        // In stage-grouped mode one column represents a deployment stage (id = `stage:<LABEL>`); otherwise
-        // one column per environment name (id = env name), preserving the upstream layout.
-        const columnSpecs = groupByStage
-            ? groupColumnsByStage(environments)
-            : environments.map((environment) => ({ id: environment.name!, label: environment.name! }))
-
-        const dynamicColumns = columnSpecs.map((spec) => {
+        const dynamicColumns = columnSpecs.map((spec, i) => {
             return {
                 id: spec.id,
                 name: spec.label,
                 renderCell: (index: number, columnIndex: number, tableColumn: IDashboardEnvironmentColumn, tableItem: IPipelineInstance) =>
                     renderCell(index, columnIndex, tableColumn, tableItem),
                 width: 200,
+                sortProps: sorting?.columnIndex === i + 1 ? { sortOrder: sorting.order } : {},
             } as IDashboardEnvironmentColumn
         })
 
@@ -83,6 +113,14 @@ export const ListViewDeploymentsTable = (props: {
     }
 
     return (
-        <Table className="deployments-table" columns={getListViewColumns(environments)} itemProvider={new ArrayItemProvider(pipelines)} />
+        <Table
+            className="deployments-table"
+            columns={getListViewColumns()}
+            behaviors={[sortingBehavior]}
+            // Render every row: the page scrolls, so virtualization would otherwise stop
+            // materializing rows after the first viewport (the "only ~13 rows" symptom).
+            virtualize={false}
+            itemProvider={new ArrayItemProvider(sortedPipelines)}
+        />
     )
 }
