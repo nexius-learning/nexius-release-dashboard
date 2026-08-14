@@ -1,5 +1,5 @@
 import { getClient } from 'azure-devops-extension-api'
-import { PipelinesRestClient } from 'azure-devops-extension-api/Pipelines/PipelinesClient'
+import { PipelinesRestClient } from 'azure-devops-extension-api/Pipelines'
 
 /**
  * Resolves the version of the app build(s) a deployment run consumed via its pipeline resources.

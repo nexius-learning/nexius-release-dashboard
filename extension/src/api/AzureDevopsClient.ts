@@ -1,5 +1,5 @@
 import { getClient } from 'azure-devops-extension-api'
-import { PipelinesRestClient } from 'azure-devops-extension-api/Pipelines/PipelinesClient'
+import { PipelinesRestClient } from 'azure-devops-extension-api/Pipelines'
 import { TaskAgentRestClient } from 'azure-devops-extension-api/TaskAgent'
 import {
     IDashboardEnvironmentPipeline,
