@@ -2,7 +2,7 @@ import { EnvironmentDeploymentExecutionRecord, TaskAgentRestClient } from 'azure
 import { getDashboardEnvironmentPipeline } from './api/AzureDevopsClient'
 import { initAzureDevOpsSdk } from './api/AzureDevOpsSdkManager'
 import { ExtensionDataKeys, IEnvironmentInstance } from './types'
-import { PipelinesRestClient } from 'azure-devops-extension-api/Pipelines/PipelinesClient'
+import { PipelinesRestClient } from 'azure-devops-extension-api/Pipelines'
 import { getClient } from 'azure-devops-extension-api'
 
 export const diagnostics = async () => {
