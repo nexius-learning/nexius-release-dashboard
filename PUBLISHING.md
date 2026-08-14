@@ -15,7 +15,8 @@ Nexius service account — no personal tokens, no manual steps.
 
 A merged version bump alone never ships anything: the environment approval is
 a separate, explicit human gate. Merges that don't change the version don't
-publish at all, so ordinary changes never fail on a duplicate version. You can
+publish at all — they build and test only, and never ask for an approval — so
+ordinary changes never fail on a duplicate version. You can
 also trigger the workflow manually (**workflow_dispatch**) to force a publish
 of the current version — the same environment approval applies.
 
