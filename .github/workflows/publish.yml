@@ -1,8 +1,12 @@
 # Build, test and publish the Nexius Release Dashboard extension to the Azure DevOps
 # Marketplace. Publishing runs under the BOT identity via the AZURE_DEVOPS_MARKETPLACE_PAT
-# repo secret (a Marketplace "Manage"-scoped PAT of the service/bot account) — never a
-# personal token. It only publishes when configs/nexius.json's version was bumped in the
-# merge (or on a manual dispatch), so ordinary merges don't fail on a duplicate version.
+# secret (a Marketplace "Manage"-scoped PAT of the service/bot account) — never a personal
+# token — and waits for an approval on the `marketplace` environment.
+#
+# Split in two jobs on purpose: `check` always builds and tests, `publish` carries the
+# environment (and therefore the approval prompt) and only runs when the version actually
+# changed. Gating the whole thing in one job would ask for an approval on every push to
+# extension/**, including ones that would publish nothing.
 name: Publish extension
 
 on:
@@ -12,12 +16,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  check:
     runs-on: ubuntu-latest
     if: github.repository == 'nexius-learning/nexius-release-dashboard'
-    environment: marketplace # holds the Marketplace PAT; deployments restricted to main
     permissions:
-      contents: write # create the git tag + GitHub release
+      contents: read
+    outputs:
+      publish: ${{ steps.ver.outputs.publish }}
+      version: ${{ steps.ver.outputs.version }}
     defaults:
       run:
         working-directory: extension
@@ -56,8 +62,33 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+  publish:
+    needs: check
+    if: needs.check.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    environment: marketplace # holds the Marketplace PAT; approval + main-only deployments
+    permissions:
+      contents: write # create the git tag + GitHub release
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      # Rebuilt here rather than handed over as an artifact: npm ci is lockfile-pinned, so
+      # this reproduces the checked build, and the publish job stays self-contained.
+      - run: npm ci
+      - run: npm run compile
+
       - name: Publish to ADO Marketplace
-        if: steps.ver.outputs.publish == 'true'
         run: >-
           npx tfx-cli extension publish
           --manifest-globs vss-extension.json
@@ -69,11 +100,10 @@ jobs:
           MARKETPLACE_PAT: ${{ secrets.AZURE_DEVOPS_MARKETPLACE_PAT }}
 
       - name: Create GitHub release
-        if: steps.ver.outputs.publish == 'true'
         working-directory: .
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.ver.outputs.version }} # env-indirected — never inline ${{ }} into the script
+          VERSION: ${{ needs.check.outputs.version }} # env-indirected — never inline ${{ }} into the script
         run: |
           TAG="v${VERSION}"
           # Auto-generated notes (categorised by .github/release.yml) from PRs since the last release.
