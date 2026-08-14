@@ -9,6 +9,33 @@ import {
     IEnvironmentInstance,
 } from '../types'
 import { isShownDeploymentResult, sortByConvention } from '../utilities'
+import { mapWithConcurrency } from '../utils/concurrency'
+
+/** Page size when listing environments. The API defaults to 50 and pages with a continuation token. */
+const ENVIRONMENT_PAGE_SIZE = 500
+/** Safety bound so a server that keeps handing back a token can never spin forever. */
+const MAX_ENVIRONMENT_PAGES = 50
+/** Deployment records are fetched per environment; keep several in flight without flooding the API. */
+const DEPLOYMENT_FETCH_CONCURRENCY = 8
+
+/**
+ * Fetch EVERY environment in the project.
+ *
+ * The REST API returns 50 environments per page and hands back a continuation token. Reading only
+ * the first page silently truncated the dashboard: pipelines that deploy exclusively to
+ * environments beyond the first page never produced a row at all.
+ */
+async function getAllEnvironments(taskAgentClient: TaskAgentRestClient, projectName: string) {
+    const all = []
+    let continuationToken: string | undefined = undefined
+    for (let page = 0; page < MAX_ENVIRONMENT_PAGES; page++) {
+        const result = await taskAgentClient.getEnvironments(projectName, undefined, continuationToken, ENVIRONMENT_PAGE_SIZE)
+        all.push(...result)
+        continuationToken = result.continuationToken ?? undefined
+        if (!continuationToken || result.length === 0) break
+    }
+    return all
+}
 
 export async function getDashboardEnvironmentPipeline(
     projectName: string,
@@ -19,34 +46,39 @@ export async function getDashboardEnvironmentPipeline(
 
     const [pipelines, environments] = await Promise.all([
         pipelinesClient.listPipelines(projectName, 'name asc', 1000),
-        taskAgentClient.getEnvironments(projectName),
+        getAllEnvironments(taskAgentClient, projectName),
     ])
 
-    const environmentPipelines: IEnvironmentPipelines[] = []
-    for (const environment of environments) {
-        const deployments = await taskAgentClient.getEnvironmentDeploymentExecutionRecords(projectName, environment.id, undefined, 1000)
-        const environmentPipeline: IEnvironmentPipelines = {
-            name: environment.name,
-            pipeline: {},
-        }
-        for (const deployment of deployments) {
-            // With the setting on, ignore skipped/canceled/in-progress records so the kept record
-            // (first-per-pipeline = most recent) is the latest green/red deploy, not a skip.
-            if (onlySuccessFailed && !isShownDeploymentResult(deployment.result)) continue
-            const pipeline = pipelines.find((p) => p.id == deployment.definition.id)
+    // One request per environment: fetched with bounded concurrency rather than one at a time,
+    // otherwise a project with a few hundred environments takes minutes to render.
+    const environmentPipelines: IEnvironmentPipelines[] = await mapWithConcurrency(
+        environments,
+        DEPLOYMENT_FETCH_CONCURRENCY,
+        async (environment) => {
+            const deployments = await taskAgentClient.getEnvironmentDeploymentExecutionRecords(projectName, environment.id, undefined, 1000)
+            const environmentPipeline: IEnvironmentPipelines = {
+                name: environment.name,
+                pipeline: {},
+            }
+            for (const deployment of deployments) {
+                // With the setting on, ignore skipped/canceled/in-progress records so the kept record
+                // (first-per-pipeline = most recent) is the latest green/red deploy, not a skip.
+                if (onlySuccessFailed && !isShownDeploymentResult(deployment.result)) continue
+                const pipeline = pipelines.find((p) => p.id == deployment.definition.id)
 
-            // Pipelines that are removed may still have deployments, but we don't want to show them.
-            if (pipeline) {
-                if (!environmentPipeline.pipeline[pipeline.name]) {
-                    environmentPipeline.pipeline[pipeline.name] = {
-                        deployment: deployment, // owner.id will be used in UI to fetch build name
-                        pipeline: pipeline,
+                // Pipelines that are removed may still have deployments, but we don't want to show them.
+                if (pipeline) {
+                    if (!environmentPipeline.pipeline[pipeline.name]) {
+                        environmentPipeline.pipeline[pipeline.name] = {
+                            deployment: deployment, // owner.id will be used in UI to fetch build name
+                            pipeline: pipeline,
+                        }
                     }
                 }
             }
+            return environmentPipeline
         }
-        environmentPipelines.push(environmentPipeline)
-    }
+    )
 
     const pipelineInstancesArray = generatePipelineInstancesArray(environmentPipelines)
 
@@ -98,7 +130,7 @@ function generatePipelineInstancesArray(environments: IEnvironmentPipelines[]): 
 export async function getEnvironmentsSortedByConvention(projectName: string): Promise<IEnvironmentInstance[]> {
     const taskAgentClient = getClient(TaskAgentRestClient)
 
-    const environments = (await taskAgentClient.getEnvironments(projectName)).map((i) => {
+    const environments = (await getAllEnvironments(taskAgentClient, projectName)).map((i) => {
         return {
             name: i.name,
         } as IEnvironmentInstance
