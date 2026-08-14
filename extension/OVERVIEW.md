@@ -19,5 +19,7 @@ You'll find this helpful if your teams have:
   (DEV / QA / STG / PROD) instead of one column per environment.
 - **Noise from skipped stages** — optionally show only succeeded / failed
   deployments.
+- **Many rows** — search by pipeline name or folder, filter by environment,
+  and sort by name or by a column's latest deployment.
 
-Both options are on the **Settings** page.
+The column-grouping and status options are on the **Settings** page.

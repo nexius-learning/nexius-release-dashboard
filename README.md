@@ -20,8 +20,13 @@ was used.
 - **Only succeeded / failed** (opt-in) — hide skipped, canceled and
   in-progress records, so a cell shows the last real deploy rather than a
   skipped stage.
+- **Search, filter and sort** — a filter bar with keyword search (pipeline
+  name / folder) and an environment filter; clickable column headers sort by
+  pipeline name or by a column's latest deployment time. All rows render
+  (no virtualization cut-off), so the grid scales to large projects.
 
-Both options are toggles on the dashboard **Settings** page (default off).
+The column-grouping and status options are toggles on the dashboard
+**Settings** page (default off).
 
 ## Development & publishing
 

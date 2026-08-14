@@ -2,15 +2,21 @@ import { Card } from 'azure-devops-ui/Card'
 import { CustomHeader, HeaderDescription, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from 'azure-devops-ui/Header'
 import { Page } from 'azure-devops-ui/Page'
 import { Spinner, SpinnerSize } from 'azure-devops-ui/Spinner'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'azure-devops-ui/Link'
 import { Button } from 'azure-devops-ui/Button'
+import { FilterBar } from 'azure-devops-ui/FilterBar'
+import { KeywordFilterBarItem } from 'azure-devops-ui/TextFilterBarItem'
+import { DropdownFilterBarItem } from 'azure-devops-ui/Dropdown'
+import { IListBoxItem } from 'azure-devops-ui/ListBox'
+import { Filter, FILTER_CHANGE_EVENT } from 'azure-devops-ui/Utilities/Filter'
+import { DropdownMultiSelection, DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection'
 import { IDashboardContentState } from '../types'
 import { TreeViewDeploymentsTable } from '../components/TreeViewDeploymentsTable'
-import { DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection'
 import { ListViewDeploymentsTable } from '../components/ListViewDeploymentsTable'
 import { HeaderCommandBar, IHeaderCommandBarItem } from 'azure-devops-ui/HeaderCommandBar'
 import { IMenuItem } from 'azure-devops-ui/Menu'
+import { filterPipelines } from '../utils/pipelineFiltering'
 
 export type DashboardContentProps = {
     state: IDashboardContentState
@@ -28,6 +34,36 @@ export const DashboardContent = (props: DashboardContentProps) => {
 
     const viewSelection = new DropdownSelection()
     const [viewType, setViewType] = useState(ViewType.List.toString())
+
+    // Keyword search (pipeline name / folder) + environment filter.
+    const filter = useMemo(() => new Filter(), [])
+    const envSelection = useMemo(() => new DropdownMultiSelection(), [])
+    const [activeFilter, setActiveFilter] = useState<{ keyword: string; environmentNames: string[] }>({
+        keyword: '',
+        environmentNames: [],
+    })
+
+    useEffect(() => {
+        const onFilterChanged = () => {
+            const rawEnvs = filter.getFilterItemValue<Array<string | IListBoxItem>>('environments') ?? []
+            setActiveFilter({
+                keyword: filter.getFilterItemValue<string>('keyword') ?? '',
+                environmentNames: rawEnvs.map((v) => (typeof v === 'string' ? v : v.id)),
+            })
+        }
+        filter.subscribe(onFilterChanged, FILTER_CHANGE_EVENT)
+        return () => filter.unsubscribe(onFilterChanged, FILTER_CHANGE_EVENT)
+    }, [filter])
+
+    const environmentItems: IListBoxItem[] = useMemo(
+        () => environments.filter((e) => !!e.name).map((e) => ({ id: e.name!, text: e.name! })),
+        [environments]
+    )
+
+    const filteredPipelines = useMemo(
+        () => filterPipelines(pipelines, activeFilter.keyword, activeFilter.environmentNames),
+        [pipelines, activeFilter]
+    )
 
     const pageHeaderCommandBarItems: IHeaderCommandBarItem[] = [
         {
@@ -81,6 +117,20 @@ export const DashboardContent = (props: DashboardContentProps) => {
             </CustomHeader>
 
             <div className="page-content page-content-top">
+                {!isLoading && pipelines.length > 0 && (
+                    <div className="margin-bottom-16">
+                        <FilterBar filter={filter}>
+                            <KeywordFilterBarItem filterItemKey="keyword" placeholder="Search by pipeline or folder" />
+                            <DropdownFilterBarItem
+                                filterItemKey="environments"
+                                filter={filter}
+                                items={environmentItems}
+                                selection={envSelection}
+                                placeholder="Environment"
+                            />
+                        </FilterBar>
+                    </div>
+                )}
                 <Card>
                     {isLoading ? (
                         <div className="flex-grow padding-vertical-20 font-size-m">
@@ -101,17 +151,21 @@ export const DashboardContent = (props: DashboardContentProps) => {
                                 <Button text="View pipelines" primary={true} target="_top" href={projectInfo?.pipelinesUri} />
                             </div>
                         </div>
+                    ) : filteredPipelines.length === 0 ? (
+                        <div className="font-size-m flex-grow text-center padding-vertical-20 no-data">
+                            No pipelines match the current filter.
+                        </div>
                     ) : viewType === ViewType.List ? (
                         <ListViewDeploymentsTable
                             environments={environments}
-                            pipelines={pipelines}
+                            pipelines={filteredPipelines}
                             projectName={projectInfo?.name}
                             groupByStage={groupByStage}
                         />
                     ) : (
                         <TreeViewDeploymentsTable
                             environments={environments}
-                            pipelines={pipelines}
+                            pipelines={filteredPipelines}
                             projectName={projectInfo?.name}
                             groupByStage={groupByStage}
                         />
