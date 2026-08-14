@@ -32,6 +32,14 @@ body {
     }
 }
 
+// azure-devops-ui sets the text colour on the .bolt-textfield container but never on the inner
+// <input>, and an input does not inherit colour from its parent. Azure DevOps' own stylesheet
+// papers over that globally; inside an extension iframe it doesn't load, so on the dark theme
+// typed text fell back to the browser default (near-black) and was unreadable.
+.bolt-textfield-input {
+    color: inherit;
+}
+
 .status-icon {
     margin-top: $spacing-8;
 }
