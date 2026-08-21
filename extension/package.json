@@ -59,7 +59,7 @@
         "style-loader": "^4.0.0",
         "tfx-cli": "^0.23.4",
         "ts-jest": "^29.4.1",
-        "ts-loader": "^9.5.2",
+        "ts-loader": "^9.6.2",
         "typescript": "^5.9.2",
         "vss-web-extension-sdk": "^5.141.0",
         "webpack": "^5.94.0",
