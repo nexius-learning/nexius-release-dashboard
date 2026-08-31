@@ -1,16 +1,45 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
+# See https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 version: 2
 updates:
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/extension" # Location of package manifests
     schedule:
       interval: "weekly"
+    # One PR per dependency turned a quiet week into five near-identical review
+    # queues. Group them so a routine refresh is a single reviewable change, and
+    # keep majors separate because those are the ones that need judgement.
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
+      production-dependencies:
+        dependency-type: "production"
+        update-types: ["minor", "patch"]
+    ignore:
+      # azure-devops-ui — the component library this whole extension renders with —
+      # still declares `react: ^16.8.1` as a peer on its latest release (2.278.0),
+      # and @testing-library/react@12 peers `<18.0.0`. A React major is therefore
+      # not adoptable until upstream ships one. Revisit when azure-devops-ui does.
+      # https://www.npmjs.com/package/azure-devops-ui
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
+      # @typescript-eslint 8.68.0 (latest) still peers `typescript: >=4.8.4 <6.1.0`,
+      # so TypeScript 6/7 cannot resolve while we lint with it. Drop this ignore
+      # once typescript-eslint declares support.
+      # https://typescript-eslint.io/users/dependency-versions
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions" # keeps our workflow action versions current
     directory: "/" # workflows live at .github/workflows (repo root), not /extension
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns: ["*"]
