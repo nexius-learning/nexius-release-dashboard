@@ -146,7 +146,7 @@ exports[`TreeViewDeploymentsTable matches snapshot 1`] = `
           aria-level="1"
           aria-rowindex="2"
           class="bolt-tree-row bolt-table-row bolt-list-row first-row"
-          data-focuszone="focuszone-41"
+          data-focuszone="focuszone-[id]"
           data-row-index="0"
           id="__bolt-0"
           role="row"
@@ -228,7 +228,7 @@ exports[`TreeViewDeploymentsTable matches snapshot 1`] = `
           aria-level="2"
           aria-rowindex="3"
           class="bolt-tree-row bolt-table-row bolt-list-row"
-          data-focuszone="focuszone-41"
+          data-focuszone="focuszone-[id]"
           data-row-index="1"
           id="__bolt-1"
           role="row"
@@ -309,7 +309,7 @@ exports[`TreeViewDeploymentsTable matches snapshot 1`] = `
                 >
                   <a
                     class="bolt-table-inline-link bolt-table-link no-underline-link bolt-link"
-                    data-focuszone="focuszone-44"
+                    data-focuszone="focuszone-[id]"
                     href="https://dev.azure.com/org/project/_build/results?buildId=1"
                     rel="noopener"
                     tabindex="0"
@@ -371,7 +371,7 @@ exports[`TreeViewDeploymentsTable matches snapshot 1`] = `
                 >
                   <a
                     class="bolt-table-inline-link bolt-table-link no-underline-link bolt-link"
-                    data-focuszone="focuszone-44"
+                    data-focuszone="focuszone-[id]"
                     href="https://dev.azure.com/org/project/_build/results?buildId=1"
                     rel="noopener"
                     tabindex="0"
@@ -403,7 +403,7 @@ exports[`TreeViewDeploymentsTable matches snapshot 1`] = `
           aria-level="1"
           aria-rowindex="4"
           class="bolt-tree-row bolt-table-row bolt-list-row"
-          data-focuszone="focuszone-41"
+          data-focuszone="focuszone-[id]"
           data-row-index="2"
           id="__bolt-2"
           role="row"
@@ -485,7 +485,7 @@ exports[`TreeViewDeploymentsTable matches snapshot 1`] = `
           aria-level="2"
           aria-rowindex="5"
           class="bolt-tree-row bolt-table-row bolt-list-row"
-          data-focuszone="focuszone-41"
+          data-focuszone="focuszone-[id]"
           data-row-index="3"
           id="__bolt-3"
           role="row"
@@ -568,7 +568,7 @@ exports[`TreeViewDeploymentsTable matches snapshot 1`] = `
           aria-level="3"
           aria-rowindex="6"
           class="bolt-tree-row bolt-table-row bolt-list-row"
-          data-focuszone="focuszone-41"
+          data-focuszone="focuszone-[id]"
           data-row-index="4"
           id="__bolt-4"
           role="row"
@@ -649,7 +649,7 @@ exports[`TreeViewDeploymentsTable matches snapshot 1`] = `
                 >
                   <a
                     class="bolt-table-inline-link bolt-table-link no-underline-link bolt-link"
-                    data-focuszone="focuszone-47"
+                    data-focuszone="focuszone-[id]"
                     href="https://dev.azure.com/org/project/_build/results?buildId=2"
                     rel="noopener"
                     tabindex="0"

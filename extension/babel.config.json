@@ -1,3 +1,7 @@
 {
-    "presets": ["@babel/preset-env"]
+    "presets": [
+        ["@babel/preset-env", { "targets": { "node": "current" } }],
+        ["@babel/preset-react", { "runtime": "classic" }],
+        "@babel/preset-typescript"
+    ]
 }
