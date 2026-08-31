@@ -68,7 +68,7 @@
     },
     "overrides": {
         "ts-jest": {
-            "@babel/core": "$@babel/core"
+            "@babel/core": "^8.0.1"
         }
     },
     "engines": {
