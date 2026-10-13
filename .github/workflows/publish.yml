@@ -38,6 +38,10 @@ jobs:
           cache: npm
           cache-dependency-path: extension/package-lock.json
 
+      # Safe-Chain must follow setup-node (last GITHUB_PATH writer wins) and precede the first npm call.
+      # Local action: the shared CompositeAction one is private and unusable from this public repo.
+      - uses: ./.github/actions/setup-safe-chain
+
       - run: npm ci
       - run: npm test
       - run: npm run compile
@@ -82,6 +86,10 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: extension/package-lock.json
+
+      # Safe-Chain must follow setup-node (last GITHUB_PATH writer wins) and precede the first npm call.
+      # Local action: the shared CompositeAction one is private and unusable from this public repo.
+      - uses: ./.github/actions/setup-safe-chain
 
       # Rebuilt here rather than handed over as an artifact: npm ci is lockfile-pinned, so
       # this reproduces the checked build, and the publish job stays self-contained.
