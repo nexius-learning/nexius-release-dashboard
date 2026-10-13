@@ -1,0 +1,45 @@
+# Local copy of nexius-learning/CompositeAction/setupSafeChain. The shared action lives in a
+# private repository and GitHub does not resolve private actions from a public repository, so
+# this one is inlined. Keep `version` and `installer-sha256` in sync with the shared action.
+name: Set up Aikido Safe-Chain
+description: >-
+  Installs Aikido Safe-Chain and wraps npm/npx with its shims. Place it AFTER actions/setup-node
+  and BEFORE the first npm command (the last GITHUB_PATH writer is first on PATH).
+
+inputs:
+  version:
+    description: Safe-Chain release tag to install
+    required: false
+    default: "1.5.25"
+  installer-sha256:
+    description: SHA256 of install-safe-chain.sh for that release
+    required: false
+    default: "83069f6db4215cccf6a26bdd6e65a5c2366b9d24322b2d5d2862d47385e56682"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Safe-Chain
+      shell: sh
+      env:
+        SAFE_CHAIN_RELEASE: ${{ inputs.version }}
+        INSTALLER_SHA256: ${{ inputs.installer-sha256 }}
+      run: |
+        set -eu
+        installer="${RUNNER_TEMP}/install-safe-chain.sh"
+        curl -fsSL "https://github.com/AikidoSec/safe-chain/releases/download/${SAFE_CHAIN_RELEASE}/install-safe-chain.sh" -o "$installer"
+        echo "${INSTALLER_SHA256}  ${installer}" | sha256sum -c -
+        # --ci creates executable shims and appends them to GITHUB_PATH (no shell rc files)
+        sh "$installer" --ci
+        rm -f "$installer"
+
+    - name: Verify Safe-Chain wraps npm
+      shell: sh
+      run: |
+        set -eu
+        resolved="$(command -v npm || true)"
+        case "$resolved" in
+          */.safe-chain/shims/*) echo "npm resolves through Safe-Chain: $resolved" ;;
+          *) echo "::error::npm resolves to '${resolved:-<not found>}', not a Safe-Chain shim"; exit 1 ;;
+        esac
+        npm safe-chain-verify
