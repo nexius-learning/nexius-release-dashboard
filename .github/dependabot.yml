@@ -27,6 +27,7 @@ updates:
       # still declares `react: ^16.8.1` as a peer on its latest release (2.278.0),
       # and @testing-library/react@12 peers `<18.0.0`. A React major is therefore
       # not adoptable until upstream ships one. Revisit when azure-devops-ui does.
+      # @testing-library/react 13+ itself peers React 18+, so its majors wait too.
       # https://www.npmjs.com/package/azure-devops-ui
       - dependency-name: "react"
         update-types: ["version-update:semver-major"]
@@ -35,6 +36,8 @@ updates:
       - dependency-name: "@types/react"
         update-types: ["version-update:semver-major"]
       - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@testing-library/react"
         update-types: ["version-update:semver-major"]
       # @typescript-eslint 8.68.0 (latest) still peers `typescript: >=4.8.4 <6.1.0`,
       # so TypeScript 6/7 cannot resolve while we lint with it. Drop this ignore
