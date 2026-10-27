@@ -1,5 +1,7 @@
 # High-scrutiny paths: changes here can affect the publish pipeline / supply chain.
 /.github/workflows/ @varga-istvan-nx
-/extension/package-lock.json @varga-istvan-nx
-/extension/package.json @varga-istvan-nx
+# technical-nx co-owns only the dependency manifests, so its automated approval of
+# non-major Dependabot updates counts (.github/workflows/dependabot-auto-merge.yml).
+/extension/package-lock.json @varga-istvan-nx @technical-nx
+/extension/package.json @varga-istvan-nx @technical-nx
 /extension/configs/ @varga-istvan-nx
