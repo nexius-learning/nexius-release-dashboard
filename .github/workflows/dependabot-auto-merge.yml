@@ -1,0 +1,40 @@
+# Approves and auto-merges Dependabot's non-major updates. The merge itself stays gated by
+# branch protection on main: `build-test` must pass on an up-to-date branch first. Majors are
+# left for a human — dependabot.yml keeps them separate because they need judgement.
+name: Dependabot auto-merge
+
+on: pull_request
+
+permissions:
+  contents: write # gh pr merge --auto
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    # The PR must be Dependabot's AND this run must come from Dependabot's own push. A human
+    # commit pushed onto a Dependabot branch dismisses the approval and is never re-approved.
+    if: >-
+      github.repository == 'nexius-learning/nexius-release-dashboard' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.actor == 'dependabot[bot]'
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@v3
+
+      # Allowlist rather than "not major": a PR whose update type can't be determined is left alone.
+      - name: Approve and enable auto-merge
+        if: >-
+          steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+          steps.meta.outputs.update-type == 'version-update:semver-minor'
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          # GITHUB_TOKEN approvals are disabled org-wide and main requires a code-owner review, so
+          # the approval comes from technical-nx (see CODEOWNERS). Fine-grained PAT, this repo only,
+          # Pull requests: read & write; a Dependabot secret, so only Dependabot-triggered runs see it.
+          APPROVER_TOKEN: ${{ secrets.DEPENDABOT_APPROVER_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : "${APPROVER_TOKEN:?DEPENDABOT_APPROVER_TOKEN is not set as a Dependabot secret}"
+          GH_TOKEN="$APPROVER_TOKEN" gh pr review --approve "$PR_URL"
+          gh pr merge --auto --squash "$PR_URL"
