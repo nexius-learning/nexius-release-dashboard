@@ -15,6 +15,13 @@ updates:
       production-dependencies:
         dependency-type: "production"
         update-types: ["minor", "patch"]
+      # Security fixes otherwise land one PR per package, and every auto-merge leaves
+      # the rest behind main (which requires up-to-date branches) until Dependabot's
+      # next rebase. One PR per run merges in one go; if any fix in it is a major,
+      # the whole PR waits for a human (see dependabot-auto-merge.yml).
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
     ignore:
       # azure-devops-ui — the component library this whole extension renders with —
       # still declares `react: ^16.8.1` as a peer on its latest release (2.278.0),
