@@ -30,7 +30,7 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           # GITHUB_TOKEN approvals are disabled org-wide and main requires a code-owner review, so
-          # the approval comes from technical-nx (see CODEOWNERS). Fine-grained PAT, this repo only,
+          # the approval comes from devops-nx (see CODEOWNERS). Fine-grained PAT, this repo only,
           # Pull requests: read & write; a Dependabot secret, so only Dependabot-triggered runs see it.
           APPROVER_TOKEN: ${{ secrets.DEPENDABOT_APPROVER_TOKEN }}
           GH_TOKEN: ${{ github.token }}
