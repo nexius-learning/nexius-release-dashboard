@@ -41,7 +41,7 @@
         "@types/jest": "^30.0.0",
         "@types/react": "^16.8.18",
         "@types/react-dom": "^16.8.4",
-        "@typescript-eslint/eslint-plugin": "^8.72.0",
+        "@typescript-eslint/eslint-plugin": "^8.72.1",
         "@typescript-eslint/parser": "^8.66.0",
         "babel-jest": "^30.5.2",
         "base64-inline-loader": "^2.0.1",
